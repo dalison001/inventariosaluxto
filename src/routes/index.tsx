@@ -28,8 +28,11 @@ function LoadingFallback() {
 }
 
 /** Guard: deve estar autenticado */
-function RequireAuth() {
-  const { user, isLoadingAuth } = useAppStore()
+function AuthBootstrap() {
+  useAuth()
+  return null
+}
+
 
   if (isLoadingAuth) {
     return (
