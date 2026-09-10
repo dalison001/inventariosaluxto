@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Loader2 } from 'lucide-react'
 import { lazy, Suspense } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 
 // Lazy loading para performance
 const Login           = lazy(() => import('@/pages/Login'))
@@ -27,12 +28,14 @@ function LoadingFallback() {
   )
 }
 
-/** Guard: deve estar autenticado */
 function AuthBootstrap() {
   useAuth()
   return null
 }
 
+/** Guard: deve estar autenticado */
+function RequireAuth() {
+  const { user, isLoadingAuth } = useAppStore()
 
   if (isLoadingAuth) {
     return (
@@ -75,6 +78,7 @@ function RequireAdmin() {
 export function AppRouter() {
   return (
     <BrowserRouter>
+      <AuthBootstrap />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Rotas públicas */}
