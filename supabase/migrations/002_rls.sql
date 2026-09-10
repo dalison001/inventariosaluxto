@@ -122,8 +122,8 @@ CREATE POLICY "equipamentos_insert"
     AND auth.uid() IS NOT NULL
   );
 
--- Técnico edita apenas equipamentos do próprio hospital (não pode alterar status para 'validado')
--- Admin pode editar tudo inclusive status
+-- Usuário do hospital edita itens pendentes e pode validá-los.
+-- Admin pode editar qualquer item.
 CREATE POLICY "equipamentos_update"
   ON equipamentos FOR UPDATE
   TO authenticated
@@ -135,7 +135,6 @@ CREATE POLICY "equipamentos_update"
     is_admin()
     OR (
       hospital_id = get_my_hospital_id()
-      AND status = 'pendente'  -- técnico não pode validar
     )
   );
 

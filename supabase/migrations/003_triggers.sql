@@ -123,7 +123,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  IF NEW.status = 'validado' AND OLD.status = 'pendente' THEN
+  IF NEW.status = 'validado' AND (TG_OP = 'INSERT' OR OLD.status = 'pendente') THEN
     NEW.validado_por := auth.uid();
     NEW.validado_em  := NOW();
   END IF;
@@ -132,7 +132,6 @@ END;
 $$;
 
 CREATE TRIGGER trg_enforce_validacao
-  BEFORE UPDATE ON equipamentos
+  BEFORE INSERT OR UPDATE ON equipamentos
   FOR EACH ROW
-  WHEN (NEW.status IS DISTINCT FROM OLD.status)
   EXECUTE FUNCTION enforce_validacao();

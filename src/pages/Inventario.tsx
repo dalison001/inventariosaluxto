@@ -7,7 +7,7 @@ import type { Equipamento, TipoEquipamento, Hospital } from '@/types/database.ty
 import { formatDate } from '@/lib/utils'
 import {
   Search, Plus, QrCode, Download, FileSpreadsheet,
-  Edit2, Trash2, Loader2, Filter, Building2, Send
+  Edit2, Trash2, Loader2, Filter, Building2, Send, CheckCircle2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import jsPDF from 'jspdf'
@@ -27,6 +27,7 @@ export default function InventarioPage() {
   const [hospitais, setHospitais] = useState<Hospital[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSending, setIsSending] = useState(false)
+  const [validatingId, setValidatingId] = useState<string | null>(null)
 
   // Filtros
   const [search, setSearch]               = useState('')
@@ -90,6 +91,25 @@ export default function InventarioPage() {
     setDeleteTarget(null)
   }
 
+  async function handleValidar(equip: EquipRow) {
+    setValidatingId(equip.id)
+    try {
+      const { error } = await supabase
+        .from('equipamentos')
+        .update({ status: 'validado' })
+        .eq('id', equip.id)
+      if (error) throw error
+      setEquipamentos(prev => prev.map(item =>
+        item.id === equip.id ? { ...item, status: 'validado' } : item
+      ))
+      toast.success(`"${equip.nome}" validado!`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao validar equipamento.')
+    } finally {
+      setValidatingId(null)
+    }
+  }
+
   // ── Exportação PDF ─────────────────────────────
   function exportPDF() {
     const doc = new jsPDF({ orientation: 'landscape' })
@@ -132,7 +152,6 @@ export default function InventarioPage() {
       'Nº de Série':    e.numero_serie ?? '',
       'Status':         e.status === 'validado' ? 'Validado' : 'Pendente',
       'Hospital':       e.hospitais?.nome ?? '',
-      'Detalhes':       e.detalhes ?? '',
       'Cadastrado em':  formatDate(e.criado_em),
       'Validado em':    formatDate(e.validado_em),
     }))
@@ -301,6 +320,18 @@ export default function InventarioPage() {
                       <Link to={`/cadastro?edit=${e.id}`} className="btn-icon btn-sm text-text-muted hover:text-primary">
                         <Edit2 className="w-3.5 h-3.5" />
                       </Link>
+                      {e.status === 'pendente' && (
+                        <button
+                          onClick={() => handleValidar(e)}
+                          disabled={validatingId === e.id}
+                          className="btn-icon btn-sm text-text-muted hover:text-status-validado"
+                          title="Validar equipamento"
+                        >
+                          {validatingId === e.id
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <CheckCircle2 className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
                       {e.status === 'pendente' && (
                         <button
                           onClick={() => setDeleteTarget(e)}

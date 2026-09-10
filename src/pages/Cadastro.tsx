@@ -8,7 +8,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { Stepper } from '@/components/ui/Stepper'
 import type { TipoEquipamento } from '@/types/database.types'
 import {
-  Tag, Package, FileText, CheckCircle2, AlertCircle,
+  Tag, Package, CheckCircle2, AlertCircle,
   Plus, ChevronLeft, ChevronRight, Loader2, X
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -17,7 +17,6 @@ import { debounce } from '@/lib/utils'
 const steps = [
   { label: 'Identificação', description: 'Nome e patrimônio do equipamento' },
   { label: 'Tipo e Série',  description: 'Tipo e número de série' },
-  { label: 'Detalhes',      description: 'Observações adicionais' },
   { label: 'Revisão',       description: 'Confirme as informações' },
 ]
 
@@ -26,7 +25,7 @@ const schema = z.object({
   patrimonio:   z.string().min(1, 'Patrimônio obrigatório'),
   tipo_id:      z.string().uuid('Selecione um tipo'),
   numero_serie: z.string().optional(),
-  detalhes:     z.string().optional(),
+  status:       z.enum(['pendente', 'validado']),
 })
 
 type FormData = z.infer<typeof schema>
@@ -56,7 +55,7 @@ export default function CadastroPage() {
       nome: '',
       tipo_id: '',
       numero_serie: '',
-      detalhes: '',
+      status: 'pendente',
     },
   })
 
@@ -64,7 +63,7 @@ export default function CadastroPage() {
   const watchedNome       = watch('nome')
   const watchedTipoId     = watch('tipo_id')
   const watchedSerie      = watch('numero_serie')
-  const watchedDetalhes   = watch('detalhes')
+  const watchedStatus     = watch('status')
 
   useEffect(() => {
     loadTipos()
@@ -146,10 +145,9 @@ export default function CadastroPage() {
         tipo_id:      data.tipo_id,
         numero_serie: data.numero_serie || null,
         patrimonio:   data.patrimonio,
-        detalhes:     data.detalhes || null,
         hospital_id:  currentHospitalId!,
         criado_por:   profile?.id,
-        status:       'pendente',
+        status:       data.status,
       })
       if (error) {
         if (error.code === '23505') throw new Error('Patrimônio duplicado neste hospital.')
@@ -350,34 +348,8 @@ export default function CadastroPage() {
           </div>
         )}
 
-        {/* ── Step 2: Detalhes ─────────────────────────────── */}
+        {/* ── Step 2: Revisão ──────────────────────────────── */}
         {currentStep === 2 && (
-          <div className="card animate-slide-up">
-            <div className="card-header">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                <h2 className="text-sm font-semibold text-text">Detalhes e Observações</h2>
-              </div>
-            </div>
-            <div className="card-body">
-              <div className="form-group">
-                <label className="label" htmlFor="detalhes">Observações (marca, modelo, localização, etc.)</label>
-                <textarea
-                  id="detalhes"
-                  rows={5}
-                  placeholder="Ex: Dell Optiplex 3080, Sala de Radiologia, Andar 2..."
-                  className="input resize-none"
-                  autoFocus
-                  {...register('detalhes')}
-                />
-                <p className="text-2xs text-text-subtle mt-1">Campo opcional. Use para registrar qualquer informação relevante.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 3: Revisão ──────────────────────────────── */}
-        {currentStep === 3 && (
           <div className="card animate-slide-up">
             <div className="card-header">
               <div className="flex items-center gap-2">
@@ -391,7 +363,6 @@ export default function CadastroPage() {
                 { label: 'Patrimônio',       value: watchedPatrimonio },
                 { label: 'Tipo',             value: selectedTipo?.nome ?? '—' },
                 { label: 'Número de série',  value: watchedSerie || '—' },
-                { label: 'Detalhes',         value: watchedDetalhes || '—' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex flex-col sm:flex-row sm:items-center gap-1 py-2.5 border-b border-border/50 last:border-0">
                   <span className="text-xs text-text-muted sm:w-36 flex-shrink-0">{label}</span>
@@ -399,10 +370,29 @@ export default function CadastroPage() {
                 </div>
               ))}
 
+              <fieldset className="pt-2">
+                <legend className="label mb-2">Status ao salvar</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <label className={`flex items-center gap-3 border rounded-lg px-3 py-3 cursor-pointer transition-colors ${
+                    watchedStatus === 'pendente' ? 'border-status-pendente bg-status-pendenteBg' : 'border-border hover:bg-surface-hover'
+                  }`}>
+                    <input type="radio" value="pendente" {...register('status')} />
+                    <span className="text-sm text-text">Pendente</span>
+                  </label>
+                  <label className={`flex items-center gap-3 border rounded-lg px-3 py-3 cursor-pointer transition-colors ${
+                    watchedStatus === 'validado' ? 'border-status-validado bg-status-validadoBg' : 'border-border hover:bg-surface-hover'
+                  }`}>
+                    <input type="radio" value="validado" {...register('status')} />
+                    <span className="text-sm text-text">Validado</span>
+                  </label>
+                </div>
+              </fieldset>
+
               <div className="bg-status-infoBg border border-status-info/30 rounded-xl p-3 mt-2">
                 <p className="text-xs text-status-info text-center">
-                  O equipamento será cadastrado com status <strong>Pendente</strong> e
-                  precisará ser validado por um administrador.
+                  {watchedStatus === 'validado'
+                    ? <>O equipamento será salvo como <strong>Validado</strong>.</>
+                    : <>O equipamento será salvo como <strong>Pendente</strong> e poderá ser validado por qualquer usuário do mesmo hospital.</>}
                 </p>
               </div>
             </div>
