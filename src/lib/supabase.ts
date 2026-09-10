@@ -2,12 +2,14 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ??
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    '⚠️ Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY não configuradas. ' +
-    'Copie .env.example para .env e preencha os valores.'
+    'Variáveis públicas do Supabase não configuradas. ' +
+    'No Vercel, conecte o projeto pela integração do Supabase e faça um novo deploy.'
   )
 }
 

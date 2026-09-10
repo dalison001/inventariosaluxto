@@ -1,32 +1,25 @@
-# React + TypeScript + Vite
+# Inventario TI Saluxx
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## Deploy na Vercel com Supabase
 
-Currently, two official plugins are available:
+1. No projeto da Vercel, conecte a integracao do Supabase ao projeto desejado.
+2. Confirme que a Vercel criou `SUPABASE_URL` e uma chave publica (`SUPABASE_ANON_KEY` ou `SUPABASE_PUBLISHABLE_KEY`) para os ambientes de Production e Preview.
+3. Faca um novo deploy. O Vite converte essas variaveis para o formato publico usado pelo navegador durante o build.
+4. No Supabase, em Authentication > URL Configuration, inclua a URL da Vercel em `Site URL` e em `Redirect URLs`, com o sufixo `/login`.
+5. Aplique as migrations em `supabase/migrations`, na ordem numerica. A `003_triggers.sql` cria automaticamente o perfil quando uma conta e cadastrada.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Nunca use `SUPABASE_SERVICE_ROLE_KEY` no frontend ou em uma variavel `VITE_*`: ela concede acesso administrativo ao banco.
 
-## React Compiler
+## Desenvolvimento local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Para executar localmente, use as variaveis publicas no `.env`:
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-publica
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+```bash
+npm install
+npm run dev
+```

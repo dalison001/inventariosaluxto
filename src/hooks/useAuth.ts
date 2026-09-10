@@ -117,5 +117,9 @@ function mapAuthError(message: string): string {
     return 'A senha deve ter pelo menos 8 caracteres.'
   if (message.includes('rate limit'))
     return 'Muitas tentativas. Aguarde alguns minutos.'
-  return 'Erro na autenticação. Tente novamente.'
+  if (message.includes('Database error saving new user'))
+    return 'O Supabase não conseguiu criar o perfil do usuário. Verifique se a migration 003_triggers.sql foi aplicada.'
+  if (message.includes('Email address') || message.includes('email'))
+    return 'O Supabase recusou este e-mail. Verifique as configurações de autenticação do projeto.'
+  return `Erro na autenticação: ${message}`
 }

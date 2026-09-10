@@ -1,10 +1,30 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
-export default defineConfig({
-  plugins: [
+export default defineConfig(({ mode }) => {
+  // The Vercel Supabase integration exposes server-style names (SUPABASE_*).
+  // Map only the public URL/key into Vite's client-side environment at build time.
+  const env = loadEnv(mode, process.cwd(), '')
+  const supabaseUrl =
+    env.VITE_SUPABASE_URL ??
+    env.SUPABASE_URL ??
+    env.NEXT_PUBLIC_SUPABASE_URL
+  const supabasePublishableKey =
+    env.VITE_SUPABASE_ANON_KEY ??
+    env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+    env.SUPABASE_ANON_KEY ??
+    env.SUPABASE_PUBLISHABLE_KEY ??
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+  return {
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl ?? ''),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabasePublishableKey ?? ''),
+    },
+    plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -49,13 +69,13 @@ export default defineConfig({
         ]
       }
     })
-  ],
-  resolve: {
+    ],
+    resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
-  },
-  server: {
+    },
+    server: {
     port: 5173,
     headers: {
       'Content-Security-Policy': [
@@ -68,6 +88,7 @@ export default defineConfig({
         "worker-src 'self' blob:",
         "frame-ancestors 'none'",
       ].join('; ')
+    }
     }
   }
 })
