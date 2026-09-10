@@ -17,33 +17,23 @@ INSERT INTO tipos_equipamento (id, nome) VALUES
 ON CONFLICT (nome) DO NOTHING;
 
 -- ============================================================
--- Hospitais (substitua pelos dados reais da sua rede)
--- Você pode editar estes dados diretamente no admin do sistema
+-- Hospitais da rede estadual do Tocantins
 -- ============================================================
 INSERT INTO hospitais (nome, codigo, cidade, ativo) VALUES
-  ('Hospital 01', 'HSP-001', 'Cidade 1', TRUE),
-  ('Hospital 02', 'HSP-002', 'Cidade 2', TRUE),
-  ('Hospital 03', 'HSP-003', 'Cidade 3', TRUE),
-  ('Hospital 04', 'HSP-004', 'Cidade 4', TRUE),
-  ('Hospital 05', 'HSP-005', 'Cidade 5', TRUE),
-  ('Hospital 06', 'HSP-006', 'Cidade 6', TRUE),
-  ('Hospital 07', 'HSP-007', 'Cidade 7', TRUE),
-  ('Hospital 08', 'HSP-008', 'Cidade 8', TRUE),
-  ('Hospital 09', 'HSP-009', 'Cidade 9', TRUE),
-  ('Hospital 10', 'HSP-010', 'Cidade 10', TRUE),
-  ('Hospital 11', 'HSP-011', 'Cidade 11', TRUE),
-  ('Hospital 12', 'HSP-012', 'Cidade 12', TRUE),
-  ('Hospital 13', 'HSP-013', 'Cidade 13', TRUE),
-  ('Hospital 14', 'HSP-014', 'Cidade 14', TRUE),
-  ('Hospital 15', 'HSP-015', 'Cidade 15', TRUE),
-  ('Hospital 16', 'HSP-016', 'Cidade 16', TRUE),
-  ('Hospital 17', 'HSP-017', 'Cidade 17', TRUE),
-  ('Hospital 18', 'HSP-018', 'Cidade 18', TRUE),
-  ('Hospital 19', 'HSP-019', 'Cidade 19', TRUE),
-  ('Hospital 20', 'HSP-020', 'Cidade 20', TRUE),
-  ('Hospital 21', 'HSP-021', 'Cidade 21', TRUE),
-  ('Hospital 22', 'HSP-022', 'Cidade 22', TRUE),
-  ('Hospital 23', 'HSP-023', 'Cidade 23', TRUE),
-  ('Hospital 24', 'HSP-024', 'Cidade 24', TRUE),
-  ('Hospital 25', 'HSP-025', 'Cidade 25', TRUE)
+  ('HRA – Hospital Regional de Araguaína',          'HRA',   'Araguaína',            TRUE),
+  ('HMDR – Hospital e Maternidade Dona Regina',     'HMDR',  'Palmas',               TRUE),
+  ('HRG – Hospital Regional de Gurupi',             'HRG',   'Gurupi',               TRUE),
+  ('HRPT – Hospital Regional Paraíso do Tocantins', 'HRPT',  'Paraíso do Tocantins', TRUE),
+  ('HRPN – Hospital Regional de Porto Nacional',    'HRPN',  'Porto Nacional',       TRUE),
+  ('HMITD – Hospital e Maternidade Tia Dedé',       'HMITD', 'Porto Nacional',       TRUE),
+  ('HRGUA – Hospital Regional de Guaraí',           'HRGUA', 'Guaraí',               TRUE),
+  ('HRM – Hospital Regional de Miracema',           'HRM',   'Miracema',             TRUE),
+  ('HRAUG – Hospital Regional de Augustinópolis',   'HRAUG', 'Augustinópolis',       TRUE),
+  ('HRPA – Hospital Regional de Pedro Afonso',      'HRPA',  'Pedro Afonso',         TRUE),
+  ('HMR – Hospital e Maternidade Irmã Rita',        'HMR',   'Araguatins',           TRUE),
+  ('HRTC – Hospital de Referência de Araguaçu',     'HRTC',  'Araguaçu',             TRUE),
+  ('HIARR – Hospital Regional de Arraias',          'HIARR', 'Arraias',              TRUE),
+  ('HRD – Hospital de Referência de Dianópolis',    'HRD',   'Dianópolis',           TRUE),
+  ('HRX – Hospital Regional de Xambioá',            'HRX',   'Xambioá',              TRUE),
+  ('HRAV – Hospital Regional de Alvorada',          'HRAV',  'Alvorada',             TRUE)
 ON CONFLICT (codigo) DO NOTHING;
