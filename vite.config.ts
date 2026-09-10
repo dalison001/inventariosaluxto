@@ -8,21 +8,24 @@ export default defineConfig(({ mode }) => {
   // Map only the public URL/key into Vite's client-side environment at build time.
   const env = loadEnv(mode, process.cwd(), '')
   const supabaseUrl =
-    env.VITE_SUPABASE_URL ??
+    process.env.SUPABASE_URL ??
     env.SUPABASE_URL ??
-    env.NEXT_PUBLIC_SUPABASE_URL
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    env.VITE_SUPABASE_URL
   const supabasePublishableKey =
-    env.VITE_SUPABASE_ANON_KEY ??
-    env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
     env.SUPABASE_ANON_KEY ??
+    process.env.SUPABASE_PUBLISHABLE_KEY ??
     env.SUPABASE_PUBLISHABLE_KEY ??
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    env.VITE_SUPABASE_ANON_KEY ??
+    env.VITE_SUPABASE_PUBLISHABLE_KEY
 
   return {
     define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl ?? ''),
-      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabasePublishableKey ?? ''),
+      __SUPABASE_URL__: JSON.stringify(supabaseUrl ?? ''),
+      __SUPABASE_PUBLISHABLE_KEY__: JSON.stringify(supabasePublishableKey ?? ''),
     },
     plugins: [
     react(),
