@@ -35,8 +35,8 @@ export default function RegisterPage() {
   async function onSubmit(data: FormData) {
     try {
       setIsLoading(true)
-      await signUp(data.email, data.password, data.nome)
-      setSuccess(true)
+      const result = await signUp(data.email, data.password, data.nome)
+      if (result.requiresEmailConfirmation) setSuccess(true)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao criar conta.'
       setError('root', { message: msg })

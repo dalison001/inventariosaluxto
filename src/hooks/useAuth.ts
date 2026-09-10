@@ -2,43 +2,38 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAppStore } from '@/store/useAppStore'
+import type { Perfil } from '@/types/database.types'
 import toast from 'react-hot-toast'
 
-export function useAuth() {
+interface UseAuthOptions {
+  initialize?: boolean
+}
+
+export function useAuth({ initialize = false }: UseAuthOptions = {}) {
   const { setUser, setProfile, setLoadingAuth, clear } = useAppStore()
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Verifica sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email ?? '' })
-        fetchProfile(session.user.id)
-      } else {
-        setLoadingAuth(false)
-      }
-    })
+    if (!initialize) return
 
-    // Listener de mudanças de estado auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser({ id: session.user.id, email: session.user.email ?? '' })
-          await fetchProfile(session.user.id)
+        if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session?.user) {
+          await establishSession(session.user, event === 'SIGNED_IN')
+        } else if (event === 'INITIAL_SESSION') {
+          setLoadingAuth(false)
         } else if (event === 'SIGNED_OUT') {
           clear()
           navigate('/login', { replace: true })
-        } else if (event === 'TOKEN_REFRESHED') {
-          // Silencioso
         }
       }
     )
 
     return () => subscription.unsubscribe()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [initialize])
 
-  async function fetchProfile(userId: string) {
+  async function fetchProfile(userId: string): Promise<Perfil | null> {
     try {
       const { data, error } = await supabase
         .from('perfis')
@@ -48,34 +43,52 @@ export function useAuth() {
 
       if (error) throw error
       setProfile(data)
+      return data
     } catch (err) {
       console.error('Erro ao buscar perfil:', err)
+      return null
     } finally {
       setLoadingAuth(false)
     }
   }
 
+  async function establishSession(
+    user: { id: string; email?: string },
+    redirect: boolean,
+  ) {
+    setLoadingAuth(true)
+    setUser({ id: user.id, email: user.email ?? '' })
+    const profile = await fetchProfile(user.id)
+
+    if (redirect && profile) {
+      navigate('/inventario', { replace: true })
+    }
+  }
+
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       const msg = mapAuthError(error.message)
       throw new Error(msg)
     }
+    if (data.user) await establishSession(data.user, true)
   }
 
   async function signUp(email: string, password: string, nome: string) {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { nome },
-        emailRedirectTo: `${window.location.origin}/login`,
-      },
+      options: { data: { nome } },
     })
     if (error) {
       const msg = mapAuthError(error.message)
       throw new Error(msg)
     }
+    if (data.session?.user) {
+      await establishSession(data.session.user, true)
+      return { requiresEmailConfirmation: false }
+    }
+    return { requiresEmailConfirmation: true }
   }
 
   async function signOut() {
@@ -97,7 +110,7 @@ export function useAuth() {
       })
       .eq('id', userId)
 
-    if (error) throw new Error('Não foi possível salvar o hospital. Tente novamente.')
+    if (error) throw new Error(error.message)
 
     // Recarrega perfil
     await fetchProfile(userId)

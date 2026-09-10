@@ -8,6 +8,8 @@
 4. No Supabase, em Authentication > URL Configuration, inclua a URL da Vercel em `Site URL` e em `Redirect URLs`, com o sufixo `/login`.
 5. Aplique as migrations em `supabase/migrations`, na ordem numerica. A `003_triggers.sql` cria automaticamente o perfil quando uma conta e cadastrada.
 
+Em Supabase > Authentication > Providers > Email, desative `Confirm email` para que contas novas entrem imediatamente apos o cadastro.
+
 Nunca use `SUPABASE_SERVICE_ROLE_KEY` no frontend ou em uma variavel `VITE_*`: ela concede acesso administrativo ao banco.
 
 ## Desenvolvimento local

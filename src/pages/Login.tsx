@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,7 +16,6 @@ type FormData = z.infer<typeof schema>
 
 export default function LoginPage() {
   const { signIn } = useAuth()
-  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -28,7 +27,6 @@ export default function LoginPage() {
     try {
       setIsLoading(true)
       await signIn(data.email, data.password)
-      // onAuthStateChange irá redirecionar
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao fazer login.'
       setError('root', { message: msg })
