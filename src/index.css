@@ -1,0 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-text min-h-screen;
+    overscroll-behavior: none;
+  }
+
+  /* Scrollbar personalizado */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111827;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e3a5f;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2563eb;
+  }
+
+  /* Focus ring acessível */
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Seleção de texto */
+  ::selection {
+    background: rgba(37, 99, 235, 0.3);
+    color: #f1f5f9;
+  }
+}
+
+@layer components {
+  /* ── Botões ────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-medium
+           transition-all duration-200 focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-primary focus-visible:ring-offset-2
+           focus-visible:ring-offset-background disabled:opacity-50
+           disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-hover
+           shadow-glow-blue hover:shadow-glow-blue-lg
+           active:scale-95 px-5 py-3 text-sm;
+  }
+
+  .btn-secondary {
+    @apply btn bg-surface text-text border border-border
+           hover:bg-surface-hover hover:border-primary
+           active:scale-95 px-5 py-3 text-sm;
+  }
+
+  .btn-ghost {
+    @apply btn text-text-muted hover:text-text hover:bg-surface-hover
+           active:scale-95 px-3 py-2 text-sm;
+  }
+
+  .btn-danger {
+    @apply btn bg-status-dangerBg text-status-danger border border-status-danger/30
+           hover:bg-status-danger hover:text-white
+           active:scale-95 px-5 py-3 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-4 text-base min-h-[52px];
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
+  }
+
+  .btn-icon {
+    @apply btn p-2.5 rounded-xl aspect-square;
+  }
+
+  /* ── Cards ─────────────────────────────────────────── */
+  .card {
+    @apply bg-surface border border-border rounded-2xl shadow-card;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-primary/40
+           hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-border flex items-center justify-between;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+
+  /* ── Inputs ─────────────────────────────────────────── */
+  .input {
+    @apply w-full bg-background border border-border rounded-xl px-4 py-3
+           text-text placeholder:text-text-subtle
+           focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30
+           transition-colors duration-200 text-sm;
+  }
+
+  .input-error {
+    @apply border-status-danger focus:border-status-danger focus:ring-status-danger/30;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-text-muted mb-1.5;
+  }
+
+  .error-msg {
+    @apply text-xs text-status-danger mt-1 flex items-center gap-1;
+  }
+
+  .form-group {
+    @apply flex flex-col gap-1;
+  }
+
+  /* ── Select ─────────────────────────────────────────── */
+  select.input {
+    @apply appearance-none cursor-pointer pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  /* ── Badges / Status ────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-pendente {
+    @apply badge bg-status-pendenteBg text-status-pendente border border-status-pendente/30;
+  }
+
+  .badge-validado {
+    @apply badge bg-status-validadoBg text-status-validado border border-status-validado/30;
+  }
+
+  .badge-danger {
+    @apply badge bg-status-dangerBg text-status-danger border border-status-danger/30;
+  }
+
+  .badge-info {
+    @apply badge bg-status-infoBg text-status-info border border-status-info/30;
+  }
+
+  /* ── Stepper ────────────────────────────────────────── */
+  .stepper-step {
+    @apply flex items-center gap-2;
+  }
+
+  .stepper-circle {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+           border-2 transition-all duration-300 flex-shrink-0;
+  }
+
+  .stepper-circle-active {
+    @apply stepper-circle border-primary bg-primary text-white shadow-glow-blue;
+  }
+
+  .stepper-circle-done {
+    @apply stepper-circle border-primary bg-primary/20 text-primary;
+  }
+
+  .stepper-circle-inactive {
+    @apply stepper-circle border-border bg-surface text-text-subtle;
+  }
+
+  .stepper-line {
+    @apply h-0.5 flex-1 transition-all duration-500;
+  }
+
+  /* ── Table ──────────────────────────────────────────── */
+  .table-container {
+    @apply overflow-x-auto rounded-2xl border border-border;
+  }
+
+  table.data-table {
+    @apply w-full text-sm;
+  }
+
+  table.data-table thead {
+    @apply bg-surface-active;
+  }
+
+  table.data-table th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider
+           border-b border-border cursor-pointer select-none;
+  }
+
+  table.data-table th:hover {
+    @apply text-text;
+  }
+
+  table.data-table td {
+    @apply px-4 py-3 text-text border-b border-border/50;
+  }
+
+  table.data-table tbody tr {
+    @apply transition-colors hover:bg-surface-hover;
+  }
+
+  table.data-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* ── Scanner overlay ────────────────────────────────── */
+  .scanner-overlay {
+    @apply absolute inset-0 bg-black/60 flex items-center justify-center;
+  }
+
+  .scanner-frame {
+    @apply relative w-64 h-64 border-2 border-primary rounded-2xl;
+  }
+
+  .scanner-corner {
+    @apply absolute w-6 h-6 border-primary;
+  }
+
+  .scanner-line {
+    @apply absolute left-2 right-2 h-0.5 bg-primary/80
+           shadow-[0_0_8px_rgba(37,99,235,0.8)] animate-scanner-line;
+  }
+
+  /* ── Sidebar ────────────────────────────────────────── */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium
+           text-text-muted transition-all duration-200
+           hover:bg-surface-hover hover:text-text;
+  }
+
+  .sidebar-item-active {
+    @apply sidebar-item bg-primary/10 text-primary border border-primary/20;
+  }
+
+  /* ── Toast custom ───────────────────────────────────── */
+  .toast-custom {
+    @apply card px-4 py-3 text-sm font-medium shadow-card-hover;
+  }
+
+  /* ── Misc ───────────────────────────────────────────── */
+  .divider {
+    @apply border-t border-border my-4;
+  }
+
+  .page-header {
+    @apply flex items-center justify-between mb-6 flex-wrap gap-3;
+  }
+
+  .page-title {
+    @apply text-xl font-semibold text-text;
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-12 h-12 text-text-subtle mb-3;
+  }
+
+  .empty-state-title {
+    @apply text-base font-medium text-text-muted mb-1;
+  }
+
+  .empty-state-desc {
+    @apply text-sm text-text-subtle;
+  }
+}
+
+@layer utilities {
+  .text-gradient-blue {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .bg-grid {
+    background-image: linear-gradient(rgba(37, 99, 235, 0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(37, 99, 235, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .safe-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
