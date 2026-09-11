@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 import type { Perfil, Hospital } from '@/types/database.types'
 import { formatDate, formatRelative } from '@/lib/utils'
 import {
-  Users, Building2, Shield, Loader2, Edit2, X, Search
+  Users, Building2, Shield, Loader2, Edit2, X, Search, Trash2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -17,11 +17,13 @@ export default function UsuariosPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [editTarget, setEditTarget] = useState<PerfilRow | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<PerfilRow | null>(null)
 
   // Form
   const [editHospitalId, setEditHospitalId] = useState('')
   const [editRole, setEditRole] = useState<'tecnico' | 'admin'>('tecnico')
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => { loadData() }, [])
 
@@ -62,6 +64,24 @@ export default function UsuariosPage() {
       toast.error('Erro ao salvar perfil.')
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId: deleteTarget.id },
+      })
+      if (error) throw error
+      toast.success(`Usuário "${deleteTarget.nome}" excluído.`)
+      setDeleteTarget(null)
+      await loadData()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao excluir usuário.')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -136,15 +156,43 @@ export default function UsuariosPage() {
                     {u.ultimo_acesso ? formatRelative(u.ultimo_acesso) : '—'}
                   </td>
                   <td className="text-right">
-                    <button onClick={() => openEdit(u)}
-                      className="btn-icon btn-sm text-text-muted hover:text-primary">
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1 justify-end">
+                      <button onClick={() => openEdit(u)}
+                        className="btn-icon btn-sm text-text-muted hover:text-primary" title="Editar usuário">
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => setDeleteTarget(u)}
+                        className="btn-icon btn-sm text-text-muted hover:text-status-danger" title="Excluir usuário">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="card max-w-sm w-full animate-slide-up">
+            <div className="card-body space-y-4">
+              <div className="text-center">
+                <Trash2 className="w-10 h-10 text-status-danger mx-auto mb-3" />
+                <h3 className="text-base font-semibold text-text">Excluir usuário?</h3>
+                <p className="text-sm text-text-muted mt-1">
+                  A conta de <strong className="text-text">{deleteTarget.nome}</strong> será removida permanentemente.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteTarget(null)} className="btn-secondary flex-1">Cancelar</button>
+                <button onClick={handleDelete} disabled={isDeleting} className="btn-danger flex-1">
+                  {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Excluir'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

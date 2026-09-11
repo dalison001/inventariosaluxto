@@ -100,7 +100,6 @@ export interface Database {
           tipo_id: string
           numero_serie: string | null
           patrimonio: string
-          detalhes: string | null
           status: 'pendente' | 'validado'
           hospital_id: string
           criado_por: string | null
@@ -115,7 +114,6 @@ export interface Database {
           tipo_id: string
           numero_serie?: string | null
           patrimonio: string
-          detalhes?: string | null
           status?: 'pendente' | 'validado'
           hospital_id: string
           criado_por?: string | null
@@ -130,7 +128,6 @@ export interface Database {
           tipo_id?: string
           numero_serie?: string | null
           patrimonio?: string
-          detalhes?: string | null
           status?: 'pendente' | 'validado'
           hospital_id?: string
           criado_por?: string | null

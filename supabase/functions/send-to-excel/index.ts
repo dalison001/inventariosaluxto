@@ -130,14 +130,13 @@ serve(async (req) => {
       }
 
       // Montar dados como linhas da planilha
-      // Header: Nome | Patrimônio | Tipo | Nº Série | Status | Detalhes | Cadastrado em
+      // Header: Nome | Patrimônio | Tipo | Nº Série | Status | Cadastrado em
       const rows = equips.map((e: any) => [
         e.nome || '',
         e.patrimonio || '',
         e.tipos_equipamento?.nome || '',
         e.numero_serie || '',
         e.status === 'validado' ? 'Validado' : 'Pendente',
-        e.detalhes || '',
         e.criado_em ? new Date(e.criado_em).toLocaleDateString('pt-BR') : '',
       ])
 
@@ -168,7 +167,7 @@ serve(async (req) => {
 
       // Inserir os dados na próxima linha livre
       const endRow = startRow + rows.length - 1
-      const rangeAddress = `A${startRow}:G${endRow}`
+      const rangeAddress = `A${startRow}:F${endRow}`
 
       const patchRes = await fetch(`${baseUrl}/range(address='${rangeAddress}')`, {
         method: 'PATCH',

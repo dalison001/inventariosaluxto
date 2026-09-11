@@ -67,7 +67,6 @@ CREATE TABLE equipamentos (
   tipo_id       UUID NOT NULL REFERENCES tipos_equipamento(id),
   numero_serie  TEXT,
   patrimonio    TEXT NOT NULL,
-  detalhes      TEXT,
   status        status_enum NOT NULL DEFAULT 'pendente',
   hospital_id   UUID NOT NULL REFERENCES hospitais(id),
   criado_por    UUID REFERENCES perfis(id) ON DELETE SET NULL,

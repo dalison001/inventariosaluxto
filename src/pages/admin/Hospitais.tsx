@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase'
 import type { Hospital, HospitalInsert } from '@/types/database.types'
 import {
   Building2, Plus, Edit2, Loader2, AlertCircle,
-  CheckCircle2, X, Power, PowerOff
+  CheckCircle2, X, Power, PowerOff, Trash2
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -12,6 +12,7 @@ export default function HospitaisPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editTarget, setEditTarget] = useState<Hospital | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Hospital | null>(null)
 
   // Form
   const [nome, setNome] = useState('')
@@ -19,6 +20,7 @@ export default function HospitaisPage() {
   const [cidade, setCidade] = useState('')
   const [ativo, setAtivo] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => { loadData() }, [])
 
@@ -98,6 +100,28 @@ export default function HospitaisPage() {
     await loadData()
   }
 
+  async function handleDelete() {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase
+        .from('hospitais')
+        .delete()
+        .eq('id', deleteTarget.id)
+      if (error?.code === '23503') {
+        throw new Error('Este hospital possui equipamentos vinculados e não pode ser excluído.')
+      }
+      if (error) throw error
+      toast.success('Hospital excluído.')
+      setDeleteTarget(null)
+      await loadData()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao excluir hospital.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <div>
       <div className="page-header">
@@ -151,12 +175,37 @@ export default function HospitaisPage() {
                       <button onClick={() => toggleAtivo(h)} className="btn-icon btn-sm text-text-muted hover:text-status-pendente">
                         {h.ativo ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />}
                       </button>
+                      <button onClick={() => setDeleteTarget(h)} className="btn-icon btn-sm text-text-muted hover:text-status-danger" title="Excluir hospital">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="card max-w-sm w-full animate-slide-up">
+            <div className="card-body space-y-4">
+              <div className="text-center">
+                <Trash2 className="w-10 h-10 text-status-danger mx-auto mb-3" />
+                <h3 className="text-base font-semibold text-text">Excluir hospital?</h3>
+                <p className="text-sm text-text-muted mt-1">
+                  <strong className="text-text">{deleteTarget.nome}</strong> será removido permanentemente.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteTarget(null)} className="btn-secondary flex-1">Cancelar</button>
+                <button onClick={handleDelete} disabled={isDeleting} className="btn-danger flex-1">
+                  {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Excluir'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

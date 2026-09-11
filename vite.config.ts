@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 export default defineConfig(({ mode }) => {
   // The Vercel Supabase integration exposes server-style names (SUPABASE_*).
@@ -74,9 +75,9 @@ export default defineConfig(({ mode }) => {
     })
     ],
     resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
-    }
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
+      }
     },
     server: {
     port: 5173,
