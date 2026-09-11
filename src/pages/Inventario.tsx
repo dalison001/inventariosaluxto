@@ -212,7 +212,7 @@ export default function InventarioPage() {
         </div>
       </div>
 
-      {/* Resumo Visual da Unidade (Controle do Técnico) */}
+      {/* Dashboard por Unidade / Filtro */}
       {!isLoading && (
         <div className="card mb-4 bg-surface border-border">
           <div className="card-body p-4 space-y-3">
@@ -221,13 +221,13 @@ export default function InventarioPage() {
                 <Building2 className="w-4 h-4 text-primary" />
                 <h2 className="text-sm font-semibold text-text">
                   {!isAdmin()
-                    ? `Controle Visual da Unidade: ${equipamentos[0]?.hospitais?.nome ?? 'Seu Hospital'}`
-                    : `Controle Visual: ${filterHospital ? hospitais.find(h => h.id === filterHospital)?.nome ?? 'Hospital Selecionado' : 'Todas as Unidades'}`}
+                    ? `Dashboard: ${equipamentos[0]?.hospitais?.nome ?? 'Sua Unidade'}`
+                    : `Dashboard: ${filterHospital ? hospitais.find(h => h.id === filterHospital)?.nome ?? 'Hospital Selecionado' : 'Todas as Unidades'}`}
                 </h2>
               </div>
               {!isAdmin() && (
                 <span className="text-2xs bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 font-medium">
-                  Acesso Restrito à sua Unidade
+                  Sua Unidade
                 </span>
               )}
             </div>
@@ -235,31 +235,31 @@ export default function InventarioPage() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="bg-surface-hover/50 p-2.5 rounded-xl border border-border/40">
                 <p className="text-2xs text-text-muted uppercase tracking-wider font-semibold">Total</p>
-                <p className="text-lg font-bold text-text">{equipamentos.length}</p>
+                <p className="text-lg font-bold text-text">{filtered.length}</p>
               </div>
 
               <div className="bg-status-validadoBg/40 p-2.5 rounded-xl border border-status-validado/20">
                 <p className="text-2xs text-status-validado uppercase tracking-wider font-semibold">Validados</p>
                 <p className="text-lg font-bold text-status-validado">
-                  {equipamentos.filter(e => e.status === 'validado').length}
+                  {filtered.filter(e => e.status === 'validado').length}
                 </p>
               </div>
 
               <div className="bg-status-pendenteBg/40 p-2.5 rounded-xl border border-status-pendente/20">
                 <p className="text-2xs text-status-pendente uppercase tracking-wider font-semibold">Pendentes</p>
                 <p className="text-lg font-bold text-status-pendente">
-                  {equipamentos.filter(e => e.status === 'pendente').length}
+                  {filtered.filter(e => e.status === 'pendente').length}
                 </p>
               </div>
             </div>
 
-            {/* Mini Distribuição por Tipo na Unidade */}
-            {equipamentos.length > 0 && (
+            {/* Mini Distribuição por Tipo */}
+            {filtered.length > 0 && (
               <div className="pt-2">
-                <p className="text-2xs text-text-subtle mb-1.5 uppercase tracking-wider font-semibold">Por Categoria na Unidade:</p>
+                <p className="text-2xs text-text-subtle mb-1.5 uppercase tracking-wider font-semibold">Por Categoria:</p>
                 <div className="flex flex-wrap gap-1.5">
                   {Array.from(
-                    equipamentos.reduce((acc, e) => {
+                    filtered.reduce((acc, e) => {
                       const t = e.tipos_equipamento?.nome ?? 'Outros'
                       acc.set(t, (acc.get(t) || 0) + 1)
                       return acc

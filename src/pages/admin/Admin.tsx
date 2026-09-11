@@ -5,7 +5,7 @@ import type { Equipamento, Hospital, TipoEquipamento } from '@/types/database.ty
 import {
   Clock, FileText, Activity, Building2, Users,
   Settings, ChevronRight, Shield, Server, CheckCircle2,
-  AlertTriangle, MapPin, Package, Loader2, PieChart
+  AlertTriangle, MapPin, Package, Loader2, Filter
 } from 'lucide-react'
 
 type EquipRow = Equipamento & {
@@ -30,8 +30,7 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [equipamentos, setEquipamentos] = useState<EquipRow[]>([])
   const [hospitais, setHospitais] = useState<Hospital[]>([])
-  const [cidadesStats, setCidadesStats] = useState<CidadeStat[]>([])
-  const [tiposStats, setTiposStats] = useState<TipoStat[]>([])
+  const [selectedHospitalId, setSelectedHospitalId] = useState<string>('')
 
   useEffect(() => {
     loadDashboardData()
@@ -42,30 +41,34 @@ export default function AdminPage() {
 
     const [{ data: equipData }, { data: hospData }] = await Promise.all([
       supabase.from('equipamentos').select('*, hospitais(*), tipos_equipamento(*)'),
-      supabase.from('hospitais').select('*').eq('ativo', true),
+      supabase.from('hospitais').select('*').eq('ativo', true).order('nome'),
     ])
 
-    const equips = (equipData ?? []) as EquipRow[]
-    const hosps = (hospData ?? []) as Hospital[]
+    setEquipamentos((equipData ?? []) as EquipRow[])
+    setHospitais((hospData ?? []) as Hospital[])
+    setIsLoading(false)
+  }
 
-    setEquipamentos(equips)
-    setHospitais(hosps)
+  // Filtragem dinâmica baseada no hospital selecionado
+  const filteredEquips = selectedHospitalId
+    ? equipamentos.filter(e => e.hospital_id === selectedHospitalId)
+    : equipamentos
 
-    // Agrupar por Cidade
-    const cidadeMap = new Map<string, { total: number; validados: number; pendentes: number; hospitaisSet: Set<string> }>()
+  // Agrupar por Cidade
+  const cidadeMap = new Map<string, { total: number; validados: number; pendentes: number; hospitaisSet: Set<string> }>()
+  filteredEquips.forEach(e => {
+    const cidade = e.hospitais?.cidade || 'Não informada'
+    const existing = cidadeMap.get(cidade) || { total: 0, validados: 0, pendentes: 0, hospitaisSet: new Set<string>() }
+    existing.total += 1
+    if (e.status === 'validado') existing.validados += 1
+    else existing.pendentes += 1
+    if (e.hospital_id) existing.hospitaisSet.add(e.hospital_id)
+    cidadeMap.set(cidade, existing)
+  })
 
-    equips.forEach(e => {
-      const cidade = e.hospitais?.cidade || 'Não informada'
-      const existing = cidadeMap.get(cidade) || { total: 0, validados: 0, pendentes: 0, hospitaisSet: new Set<string>() }
-      existing.total += 1
-      if (e.status === 'validado') existing.validados += 1
-      else existing.pendentes += 1
-      if (e.hospital_id) existing.hospitaisSet.add(e.hospital_id)
-      cidadeMap.set(cidade, existing)
-    })
-
-    // Adicionar cidades de hospitais cadastrados mesmo sem equipamentos
-    hosps.forEach(h => {
+  // Se nenhum hospital selecionado, exibir todas as cidades cadastradas
+  if (!selectedHospitalId) {
+    hospitais.forEach(h => {
       const cidade = h.cidade || 'Não informada'
       if (!cidadeMap.has(cidade)) {
         cidadeMap.set(cidade, { total: 0, validados: 0, pendentes: 0, hospitaisSet: new Set([h.id]) })
@@ -73,36 +76,31 @@ export default function AdminPage() {
         cidadeMap.get(cidade)!.hospitaisSet.add(h.id)
       }
     })
-
-    const cStats: CidadeStat[] = Array.from(cidadeMap.entries()).map(([cidade, stat]) => ({
-      cidade,
-      total: stat.total,
-      validados: stat.validados,
-      pendentes: stat.pendentes,
-      hospitaisCount: stat.hospitaisSet.size,
-    })).sort((a, b) => b.total - a.total)
-
-    setCidadesStats(cStats)
-
-    // Agrupar por Tipo de Equipamento
-    const tipoMap = new Map<string, number>()
-    equips.forEach(e => {
-      const tipoNome = e.tipos_equipamento?.nome || 'Outros'
-      tipoMap.set(tipoNome, (tipoMap.get(tipoNome) || 0) + 1)
-    })
-
-    const tStats: TipoStat[] = Array.from(tipoMap.entries()).map(([nome, total]) => ({
-      nome,
-      total,
-    })).sort((a, b) => b.total - a.total)
-
-    setTiposStats(tStats)
-    setIsLoading(false)
   }
 
-  const totalEquipamentos = equipamentos.length
-  const totalValidados = equipamentos.filter(e => e.status === 'validado').length
-  const totalPendentes = equipamentos.filter(e => e.status === 'pendente').length
+  const cidadesStats: CidadeStat[] = Array.from(cidadeMap.entries()).map(([cidade, stat]) => ({
+    cidade,
+    total: stat.total,
+    validados: stat.validados,
+    pendentes: stat.pendentes,
+    hospitaisCount: stat.hospitaisSet.size,
+  })).sort((a, b) => b.total - a.total)
+
+  // Agrupar por Tipo de Equipamento
+  const tipoMap = new Map<string, number>()
+  filteredEquips.forEach(e => {
+    const tipoNome = e.tipos_equipamento?.nome || 'Outros'
+    tipoMap.set(tipoNome, (tipoMap.get(tipoNome) || 0) + 1)
+  })
+
+  const tiposStats: TipoStat[] = Array.from(tipoMap.entries()).map(([nome, total]) => ({
+    nome,
+    total,
+  })).sort((a, b) => b.total - a.total)
+
+  const totalEquipamentos = filteredEquips.length
+  const totalValidados = filteredEquips.filter(e => e.status === 'validado').length
+  const totalPendentes = filteredEquips.filter(e => e.status === 'pendente').length
   const percentValidado = totalEquipamentos > 0 ? Math.round((totalValidados / totalEquipamentos) * 100) : 0
 
   const maxCidadeTotal = Math.max(...cidadesStats.map(c => c.total), 1)
@@ -120,13 +118,30 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="page-header">
+      <div className="page-header flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <Shield className="w-6 h-6 text-primary" />
           <div>
-            <h1 className="page-title">Dashboard & Administração Central</h1>
-            <p className="text-sm text-text-muted">Visão geral e controle visual da rede de hospitais</p>
+            <h1 className="page-title">Dashboard</h1>
+            <p className="text-sm text-text-muted">Métricas e gráficos da rede hospitalar</p>
           </div>
+        </div>
+
+        {/* Filtro por Hospital */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Filter className="w-4 h-4 text-text-subtle flex-shrink-0" />
+          <select
+            className="input text-xs w-full sm:w-64"
+            value={selectedHospitalId}
+            onChange={e => setSelectedHospitalId(e.target.value)}
+          >
+            <option value="">Todas as Unidades (Rede)</option>
+            {hospitais.map(h => (
+              <option key={h.id} value={h.id}>
+                {h.nome} ({h.cidade})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -143,9 +158,11 @@ export default function AdminPage() {
                 <Server className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xs font-semibold text-text-muted uppercase tracking-wider">Total Geral</p>
+                <p className="text-2xs font-semibold text-text-muted uppercase tracking-wider">Total Equipamentos</p>
                 <p className="text-2xl font-bold text-text">{totalEquipamentos}</p>
-                <p className="text-2xs text-text-subtle">{hospitais.length} hospitais</p>
+                <p className="text-2xs text-text-subtle">
+                  {selectedHospitalId ? 'Unidade Selecionada' : `${hospitais.length} hospitais`}
+                </p>
               </div>
             </div>
 
@@ -156,7 +173,7 @@ export default function AdminPage() {
               <div>
                 <p className="text-2xs font-semibold text-text-muted uppercase tracking-wider">Validados</p>
                 <p className="text-2xl font-bold text-status-validado">{totalValidados}</p>
-                <p className="text-2xs text-text-subtle">{percentValidado}% do inventário</p>
+                <p className="text-2xs text-text-subtle">{percentValidado}% do total</p>
               </div>
             </div>
 
@@ -167,7 +184,7 @@ export default function AdminPage() {
               <div>
                 <p className="text-2xs font-semibold text-text-muted uppercase tracking-wider">Pendentes</p>
                 <p className="text-2xl font-bold text-status-pendente">{totalPendentes}</p>
-                <p className="text-2xs text-text-subtle">Aguardam aprovação</p>
+                <p className="text-2xs text-text-subtle">Aguardam validação</p>
               </div>
             </div>
 
@@ -178,14 +195,14 @@ export default function AdminPage() {
               <div>
                 <p className="text-2xs font-semibold text-text-muted uppercase tracking-wider">Cidades</p>
                 <p className="text-2xl font-bold text-text">{cidadesStats.length}</p>
-                <p className="text-2xs text-text-subtle">Municípios com unidade</p>
+                <p className="text-2xs text-text-subtle">Municípios no filtro</p>
               </div>
             </div>
           </div>
 
           {/* Gráficos em 2 colunas */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Controle Visual por Cidade */}
+            {/* Gráfico por Cidade */}
             <div className="card">
               <div className="card-header flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -196,7 +213,7 @@ export default function AdminPage() {
               </div>
               <div className="card-body space-y-4 max-h-[380px] overflow-y-auto">
                 {cidadesStats.length === 0 ? (
-                  <p className="text-xs text-text-muted text-center py-6">Nenhum dado cadastrado.</p>
+                  <p className="text-xs text-text-muted text-center py-6">Nenhum equipamento cadastrado no filtro selecionado.</p>
                 ) : (
                   cidadesStats.map(cs => {
                     const pct = Math.round((cs.total / maxCidadeTotal) * 100)
@@ -235,7 +252,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Controle Visual por Tipo de Equipamento */}
+            {/* Gráfico por Tipo de Equipamento */}
             <div className="card">
               <div className="card-header flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -246,7 +263,7 @@ export default function AdminPage() {
               </div>
               <div className="card-body space-y-4 max-h-[380px] overflow-y-auto">
                 {tiposStats.length === 0 ? (
-                  <p className="text-xs text-text-muted text-center py-6">Nenhum dado cadastrado.</p>
+                  <p className="text-xs text-text-muted text-center py-6">Nenhum equipamento cadastrado no filtro selecionado.</p>
                 ) : (
                   tiposStats.map(ts => {
                     const pct = Math.round((ts.total / maxTipoTotal) * 100)
@@ -276,9 +293,9 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Links Rápidos da Administração */}
+          {/* Links de Gestão */}
           <div>
-            <h2 className="text-sm font-semibold text-text mb-3 uppercase tracking-wider">Gestão e Ferramentas</h2>
+            <h2 className="text-xs font-semibold text-text-muted mb-3 uppercase tracking-wider">Gestão e Ferramentas</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {adminLinks.map(({ to, icon: Icon, label, desc }) => (
                 <Link key={to} to={to} className="card-hover group">

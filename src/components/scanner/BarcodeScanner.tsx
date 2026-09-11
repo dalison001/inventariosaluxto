@@ -188,13 +188,10 @@ export function BarcodeScanner({ onDetected, onClose, className }: BarcodeScanne
         </div>
       )}
 
-      {/* Footer — entrada manual */}
+      {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 p-4 pb-safe-area bg-gradient-to-t from-black/80 to-transparent safe-pb">
-        <p className="text-center text-white/60 text-xs">
-          Código não legível?{' '}
-          <button onClick={onClose} className="text-primary underline underline-offset-2">
-            Digitar manualmente
-          </button>
+        <p className="text-center text-white/50 text-xs">
+          Aponte para o código de barras ou QR Code
         </p>
       </div>
     </div>
