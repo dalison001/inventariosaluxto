@@ -5,6 +5,43 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const HOSPITAL_TO_SHEET: Record<string, string> = {
+  'xambioa':         'HRX',
+  'xambioá':         'HRX',
+  'palmas':          'HGP',
+  'dona regina':     'HMDR',
+  'gurupi':          'HRGUR',
+  'araguaina':       'HRA',
+  'araguaína':       'HRA',
+  'augustinopolis':  'HRAUG',
+  'augustinópolis':  'HRAUG',
+  'porto nacional':  'HRPN',
+  'paraiso':         'HRPT',
+  'paraíso':         'HRPT',
+  'miracema':        'HRM',
+  'tia dede':        'HMITD',
+  'tia dedé':        'HMITD',
+  'guarai':          'HRGUA',
+  'guaraí':          'HRGUA',
+  'arraias':         'HRARR',
+  'pedro afonso':    'HRPA',
+  'alvorada':        'HRAT',
+  'arapoema':        'HMIR',
+  'dianopolis':      'HRD',
+  'dianópolis':      'HRD',
+  'araguacu':        'HRTCL',
+  'araguaçu':        'HRTCL',
+}
+
+function detectSheet(hospitalNome: string): string {
+  const lower = hospitalNome.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  for (const [key, sheet] of Object.entries(HOSPITAL_TO_SHEET)) {
+    const normalKey = key.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    if (lower.includes(normalKey)) return sheet
+  }
+  return 'Geral' // Fallback se não achar
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -13,9 +50,9 @@ Deno.serve(async (req) => {
   try {
     const webhookUrl = Deno.env.get('POWER_AUTOMATE_WEBHOOK_URL')
     if (!webhookUrl) {
-      console.warn('[sync-sharepoint] POWER_AUTOMATE_WEBHOOK_URL não configurado — sync ignorado.')
+      console.warn('[sync-sharepoint] Webhook não configurado — sync ignorado.')
       return new Response(
-        JSON.stringify({ ok: true, skipped: true, reason: 'webhook not configured' }),
+        JSON.stringify({ ok: true, skipped: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -29,7 +66,9 @@ Deno.serve(async (req) => {
       hospital_nome: string
     }
 
-    // Chama o webhook do Power Automate com os dados do equipamento
+    const abaExcel = detectSheet(body.hospital_nome)
+
+    // Chama o webhook do Make.com com os dados do equipamento
     const res = await fetch(webhookUrl, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -40,6 +79,7 @@ Deno.serve(async (req) => {
         numero_serie:  body.numero_serie ?? '',
         status:        body.status === 'validado' ? 'Validado' : 'Pendente',
         hospital_nome: body.hospital_nome,
+        aba_excel:     abaExcel
       }),
     })
 
