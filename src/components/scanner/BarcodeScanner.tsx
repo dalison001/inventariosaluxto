@@ -40,8 +40,21 @@ export function BarcodeScanner({ onDetected, onClose, className }: BarcodeScanne
         return
       }
 
-      // Preferir câmera traseira
-      const deviceId = devices[currentCameraIndex]?.deviceId
+      // Priorizar câmera traseira principal (1.0x) evitando ultra-wide (0.5x)
+      let selectedIndex = currentCameraIndex
+      if (devices.length > 1 && currentCameraIndex === 0) {
+        const mainRearIndex = devices.findIndex(d => {
+          const label = d.label.toLowerCase()
+          const isRear = label.includes('back') || label.includes('rear') || label.includes('traseira') || label.includes('environment') || label.includes('0')
+          const isUltraWide = label.includes('ultra') || label.includes('0.5') || label.includes('0,5') || label.includes('wide angle') || label.includes('wideangle')
+          return isRear && !isUltraWide
+        })
+        if (mainRearIndex !== -1) {
+          selectedIndex = mainRearIndex
+        }
+      }
+
+      const deviceId = devices[selectedIndex]?.deviceId
 
       await reader.decodeFromVideoDevice(
         deviceId,

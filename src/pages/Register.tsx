@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -21,22 +21,23 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 export default function RegisterPage() {
+  const navigate = useNavigate()
   const { signUp } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [watchedPassword, setWatchedPassword] = useState('')
 
-  const { register, handleSubmit, watch, formState: { errors }, setError } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
   async function onSubmit(data: FormData) {
     try {
       setIsLoading(true)
-      const result = await signUp(data.email, data.password, data.nome)
-      if (result.requiresEmailConfirmation) setSuccess(true)
+      await signUp(data.email, data.password, data.nome)
+      toast.success('Conta criada com sucesso!')
+      navigate('/selecionar-hospital')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao criar conta.'
       setError('root', { message: msg })
@@ -44,30 +45,6 @@ export default function RegisterPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-background bg-grid flex items-center justify-center p-4">
-        <div className="w-full max-w-sm text-center animate-slide-up">
-          <div className="card card-body flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-status-validadoBg border border-status-validado/30
-                            flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 text-status-validado" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-text">Conta criada!</h2>
-              <p className="text-sm text-text-muted mt-2">
-                Verifique seu e-mail para confirmar o cadastro e, em seguida, faça login.
-              </p>
-            </div>
-            <Link to="/login" className="btn-primary w-full">
-              Ir para o Login
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   return (

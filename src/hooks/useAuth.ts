@@ -88,7 +88,17 @@ export function useAuth({ initialize = false }: UseAuthOptions = {}) {
       await establishSession(data.session.user, true)
       return { requiresEmailConfirmation: false }
     }
-    return { requiresEmailConfirmation: true }
+    // Tentar login automático se o Supabase não tiver retornado sessão imediata
+    try {
+      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
+      if (!signInErr && signInData.user) {
+        await establishSession(signInData.user, true)
+        return { requiresEmailConfirmation: false }
+      }
+    } catch {
+      // Fallback
+    }
+    return { requiresEmailConfirmation: false }
   }
 
   async function signOut() {

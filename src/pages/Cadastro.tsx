@@ -9,7 +9,7 @@ import { Stepper } from '@/components/ui/Stepper'
 import type { TipoEquipamento } from '@/types/database.types'
 import {
   Tag, Package, CheckCircle2, AlertCircle,
-  Plus, ChevronLeft, ChevronRight, Loader2, X
+  Plus, ChevronLeft, ChevronRight, Loader2, X, QrCode, ListFilter
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { debounce } from '@/lib/utils'
@@ -133,6 +133,8 @@ export default function CadastroPage() {
     setCurrentStep(prev => prev + 1)
   }
 
+  const [savedItem, setSavedItem] = useState<{ nome: string; patrimonio: string } | null>(null)
+
   async function onSubmit(data: FormData) {
     if (patrimonioStatus === 'duplicate') {
       toast.error('Patrimônio duplicado. Corrija antes de salvar.')
@@ -154,13 +156,49 @@ export default function CadastroPage() {
         throw error
       }
       toast.success('Equipamento cadastrado com sucesso!')
-      navigate('/inventario')
+      setSavedItem({ nome: data.nome, patrimonio: data.patrimonio })
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao salvar.'
       toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (savedItem) {
+    return (
+      <div className="max-w-md mx-auto text-center py-8 animate-slide-up">
+        <div className="card card-body space-y-6">
+          <div className="w-16 h-16 rounded-full bg-status-validadoBg border border-status-validado/30 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-8 h-8 text-status-validado" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-text">Cadastrado com sucesso!</h2>
+            <p className="text-sm text-text-muted mt-1">
+              <strong className="text-text">{savedItem.nome}</strong> (Patrimônio: <code className="bg-surface-active px-1.5 py-0.5 rounded font-mono text-xs text-primary">{savedItem.patrimonio}</code>)
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => navigate('/scanner')}
+              className="btn-primary w-full btn-lg flex items-center justify-center gap-2"
+            >
+              <QrCode className="w-5 h-5" />
+              Escanear outro patrimônio
+            </button>
+
+            <button
+              onClick={() => navigate('/inventario')}
+              className="btn-secondary w-full flex items-center justify-center gap-2"
+            >
+              <ListFilter className="w-4 h-4" />
+              Ir para o inventário
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const selectedTipo = tipos.find(t => t.id === watchedTipoId)
