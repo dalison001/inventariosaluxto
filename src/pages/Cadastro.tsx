@@ -33,7 +33,7 @@ type FormData = z.infer<typeof schema>
 export default function CadastroPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { currentHospitalId, profile } = useAppStore()
+  const { currentHospitalId, profile, currentHospital } = useAppStore()
   const [currentStep, setCurrentStep] = useState(0)
   const [tipos, setTipos] = useState<TipoEquipamento[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -155,6 +155,22 @@ export default function CadastroPage() {
         if (error.code === '23505') throw new Error('Patrimônio duplicado neste hospital.')
         throw error
       }
+
+      // Sincroniza com a planilha Excel no OneDrive (fire-and-forget — não bloqueia o salvamento)
+      const tipoNome = tipos.find(t => t.id === data.tipo_id)?.nome ?? data.tipo_id
+      supabase.functions
+        .invoke('sync-sharepoint', {
+          body: {
+            nome:          data.nome,
+            tipo:          tipoNome,
+            patrimonio:    data.patrimonio,
+            numero_serie:  data.numero_serie || null,
+            status:        data.status,
+            hospital_nome: currentHospital?.nome ?? '',
+          },
+        })
+        .catch((e) => console.warn('[sync-sharepoint] falha silenciosa:', e))
+
       toast.success('Equipamento cadastrado com sucesso!')
       setSavedItem({ nome: data.nome, patrimonio: data.patrimonio })
     } catch (err) {
@@ -164,6 +180,7 @@ export default function CadastroPage() {
       setIsSubmitting(false)
     }
   }
+
 
   if (savedItem) {
     return (
