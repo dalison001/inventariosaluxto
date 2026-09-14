@@ -136,6 +136,10 @@ export default function CadastroPage() {
   const [savedItem, setSavedItem] = useState<{ nome: string; patrimonio: string } | null>(null)
 
   async function onSubmit(data: FormData) {
+    if (currentStep !== 2) {
+      nextStep();
+      return;
+    }
     if (patrimonioStatus === 'duplicate') {
       toast.error('Patrimônio duplicado. Corrija antes de salvar.')
       return
