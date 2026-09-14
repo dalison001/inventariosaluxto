@@ -55,7 +55,7 @@ export default function CadastroPage() {
       nome: '',
       tipo_id: '',
       numero_serie: '',
-      status: 'pendente',
+      status: 'validado',
     },
   })
 
@@ -409,47 +409,61 @@ export default function CadastroPage() {
             <div className="card-header">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-primary" />
-                <h2 className="text-sm font-semibold text-text">Revisão — confirme as informações</h2>
+                <h2 className="text-sm font-semibold text-text">Revisão</h2>
               </div>
             </div>
-            <div className="card-body space-y-3">
+            <div className="card-body space-y-0 pb-0">
               {[
-                { label: 'Nome / Descrição', value: watchedNome },
-                { label: 'Patrimônio',       value: watchedPatrimonio },
-                { label: 'Tipo',             value: selectedTipo?.nome ?? '—' },
-                { label: 'Número de série',  value: watchedSerie || '—' },
+                { label: 'Nome', value: watchedNome },
+                { label: 'Patrimônio', value: watchedPatrimonio },
+                { label: 'Tipo', value: selectedTipo?.nome ?? '—' },
+                { label: 'Nº Série', value: watchedSerie || '—' },
               ].map(({ label, value }) => (
-                <div key={label} className="flex flex-col sm:flex-row sm:items-center gap-1 py-2.5 border-b border-border/50 last:border-0">
-                  <span className="text-xs text-text-muted sm:w-36 flex-shrink-0">{label}</span>
-                  <span className="text-sm text-text font-medium break-words">{value}</span>
+                <div key={label} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0 gap-2">
+                  <span className="text-xs text-text-muted flex-shrink-0">{label}</span>
+                  <span className="text-sm text-text font-semibold text-right break-words max-w-[60%]">{value}</span>
                 </div>
               ))}
+            </div>
 
-              <fieldset className="pt-2">
-                <legend className="label mb-2">Status ao salvar</legend>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <label className={`flex items-center gap-3 border rounded-lg px-3 py-3 cursor-pointer transition-colors ${
-                    watchedStatus === 'pendente' ? 'border-status-pendente bg-status-pendenteBg' : 'border-border hover:bg-surface-hover'
-                  }`}>
-                    <input type="radio" value="pendente" {...register('status')} />
-                    <span className="text-sm text-text">Pendente</span>
-                  </label>
-                  <label className={`flex items-center gap-3 border rounded-lg px-3 py-3 cursor-pointer transition-colors ${
-                    watchedStatus === 'validado' ? 'border-status-validado bg-status-validadoBg' : 'border-border hover:bg-surface-hover'
-                  }`}>
-                    <input type="radio" value="validado" {...register('status')} />
-                    <span className="text-sm text-text">Validado</span>
-                  </label>
+            {/* Status — botões grandes para celular */}
+            <div className="px-4 pb-4 pt-3 space-y-2 border-t border-border/50">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-wide mb-3">
+                Como salvar este equipamento?
+              </p>
+              <label className={`flex items-center gap-4 border-2 rounded-xl px-4 py-4 cursor-pointer transition-all active:scale-95 ${
+                watchedStatus === 'validado'
+                  ? 'border-status-validado bg-status-validadoBg shadow-sm'
+                  : 'border-border bg-surface hover:border-status-validado/40'
+              }`}>
+                <input type="radio" value="validado" className="sr-only" {...register('status')} />
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  watchedStatus === 'validado' ? 'border-status-validado' : 'border-border'
+                }`}>
+                  {watchedStatus === 'validado' && <div className="w-2.5 h-2.5 rounded-full bg-status-validado" />}
                 </div>
-              </fieldset>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-text">Validado ✓</p>
+                  <p className="text-xs text-text-muted mt-0.5">Equipamento já conferido (padrão)</p>
+                </div>
+              </label>
 
-              <div className="bg-status-infoBg border border-status-info/30 rounded-xl p-3 mt-2">
-                <p className="text-xs text-status-info text-center">
-                  {watchedStatus === 'validado'
-                    ? <>O equipamento será salvo como <strong>Validado</strong>.</>
-                    : <>O equipamento será salvo como <strong>Pendente</strong> e poderá ser validado por qualquer usuário do mesmo hospital.</>}
-                </p>
-              </div>
+              <label className={`flex items-center gap-4 border-2 rounded-xl px-4 py-4 cursor-pointer transition-all active:scale-95 ${
+                watchedStatus === 'pendente'
+                  ? 'border-status-pendente bg-status-pendenteBg shadow-sm'
+                  : 'border-border bg-surface hover:border-status-pendente/40'
+              }`}>
+                <input type="radio" value="pendente" className="sr-only" {...register('status')} />
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  watchedStatus === 'pendente' ? 'border-status-pendente' : 'border-border'
+                }`}>
+                  {watchedStatus === 'pendente' && <div className="w-2.5 h-2.5 rounded-full bg-status-pendente" />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-text">Pendente</p>
+                  <p className="text-xs text-text-muted mt-0.5">Precisa ser validado depois</p>
+                </div>
+              </label>
             </div>
           </div>
         )}
