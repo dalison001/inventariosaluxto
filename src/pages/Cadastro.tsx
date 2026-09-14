@@ -136,10 +136,12 @@ export default function CadastroPage() {
   const [savedItem, setSavedItem] = useState<{ nome: string; patrimonio: string } | null>(null)
 
   async function onSubmit(data: FormData) {
+    // Garantir que a submissão SÓ ocorra no último passo.
+    // Se ocorrer antes (ex: Enter no teclado), nós apenas ignoramos.
     if (currentStep !== 2) {
-      nextStep();
       return;
     }
+    
     if (patrimonioStatus === 'duplicate') {
       toast.error('Patrimônio duplicado. Corrija antes de salvar.')
       return
@@ -239,10 +241,18 @@ export default function CadastroPage() {
         </div>
       </div>
 
-      {/* Stepper */}
       <Stepper steps={steps} currentStep={currentStep} className="mb-8" />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form 
+        onSubmit={handleSubmit(onSubmit)}
+        onKeyDown={(e) => {
+          // Previne que 'Enter' submeta o form se não estivermos no último passo
+          if (e.key === 'Enter' && currentStep !== 2) {
+            e.preventDefault()
+            nextStep()
+          }
+        }}
+      >
         {/* ── Step 0: Identificação ────────────────────────── */}
         {currentStep === 0 && (
           <div className="card animate-slide-up">
