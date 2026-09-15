@@ -2,11 +2,13 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { MobileNav } from './MobileNav'
 import { useAppStore } from '@/store/useAppStore'
-import { Building2, Wifi, WifiOff } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
+import { Building2, WifiOff, Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function AppLayout() {
   const { profile, currentHospital } = useAppStore()
+  const { theme, toggleTheme } = useTheme()
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
@@ -48,11 +50,23 @@ export function AppLayout() {
             {(currentHospital || profile?.hospital_id) && (
               <div className="flex items-center gap-1 text-text-muted">
                 <Building2 className="w-3.5 h-3.5" />
-                <span className="text-xs truncate max-w-[120px]">
+                <span className="text-xs truncate max-w-[80px]">
                   {currentHospital?.nome ?? '...'}
                 </span>
               </div>
             )}
+
+            {/* Botão de tema */}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
+              aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            >
+              {theme === 'dark'
+                ? <Sun className="w-4 h-4" />
+                : <Moon className="w-4 h-4" />
+              }
+            </button>
           </div>
         </header>
 

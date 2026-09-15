@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
+﻿import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { useAppStore } from '@/store/useAppStore'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { Loader2 } from 'lucide-react'
@@ -62,7 +62,7 @@ function RequireHospital() {
   // Admin sem hospital pode acessar tudo
   if (isAdmin) return <Outlet />
 
-  // Técnico sem hospital → selecionar
+  // Tecnico sem hospital → selecionar
   if (!profile?.hospital_id) return <Navigate to="/selecionar-hospital" replace />
 
   return <Outlet />
@@ -79,41 +79,39 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <AuthBootstrap />
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* Rotas públicas */}
-          <Route path="/login"    element={<Login />} />
-          <Route path="/registro" element={<Register />} />
+      <Routes>
+        {/* Rotas publicas */}
+        <Route path="/login"    element={<Suspense fallback={<LoadingFallback />}><Login /></Suspense>} />
+        <Route path="/registro" element={<Suspense fallback={<LoadingFallback />}><Register /></Suspense>} />
 
-          {/* Rotas autenticadas */}
-          <Route element={<RequireAuth />}>
-            <Route path="/selecionar-hospital" element={<SelectHospital />} />
+        {/* Rotas autenticadas */}
+        <Route element={<RequireAuth />}>
+          <Route path="/selecionar-hospital" element={<Suspense fallback={<LoadingFallback />}><SelectHospital /></Suspense>} />
 
-            {/* Rotas com hospital */}
-            <Route element={<RequireHospital />}>
-              <Route element={<AppLayout />}>
-                <Route path="/scanner"    element={<Scanner />} />
-                <Route path="/cadastro"   element={<Cadastro />} />
-                <Route path="/inventario" element={<Inventario />} />
+          {/* Rotas com hospital */}
+          <Route element={<RequireHospital />}>
+            <Route element={<AppLayout />}>
+              <Route path="/scanner"    element={<Suspense fallback={<LoadingFallback />}><Scanner /></Suspense>} />
+              <Route path="/cadastro"   element={<Suspense fallback={<LoadingFallback />}><Cadastro /></Suspense>} />
+              <Route path="/inventario" element={<Suspense fallback={<LoadingFallback />}><Inventario /></Suspense>} />
 
-                {/* Rotas admin */}
-                <Route element={<RequireAdmin />}>
-                  <Route path="/admin"               element={<AdminHub />} />
-                  <Route path="/admin/pendentes"     element={<Pendentes />} />
-                  <Route path="/admin/auditoria"     element={<Auditoria />} />
-                  <Route path="/admin/atividade"     element={<Atividade />} />
-                  <Route path="/admin/hospitais"     element={<Hospitais />} />
-                  <Route path="/admin/usuarios"      element={<Usuarios />} />
-                  <Route path="/admin/configuracoes" element={<Configuracoes />} />
-                </Route>
+              {/* Rotas admin */}
+              <Route element={<RequireAdmin />}>
+                <Route path="/admin"               element={<Suspense fallback={<LoadingFallback />}><AdminHub /></Suspense>} />
+                <Route path="/admin/pendentes"     element={<Suspense fallback={<LoadingFallback />}><Pendentes /></Suspense>} />
+                <Route path="/admin/auditoria"     element={<Suspense fallback={<LoadingFallback />}><Auditoria /></Suspense>} />
+                <Route path="/admin/atividade"     element={<Suspense fallback={<LoadingFallback />}><Atividade /></Suspense>} />
+                <Route path="/admin/hospitais"     element={<Suspense fallback={<LoadingFallback />}><Hospitais /></Suspense>} />
+                <Route path="/admin/usuarios"      element={<Suspense fallback={<LoadingFallback />}><Usuarios /></Suspense>} />
+                <Route path="/admin/configuracoes" element={<Suspense fallback={<LoadingFallback />}><Configuracoes /></Suspense>} />
               </Route>
             </Route>
           </Route>
+        </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/inventario" replace />} />
-        </Routes>
-      </Suspense>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/inventario" replace />} />
+      </Routes>
     </BrowserRouter>
   )
 }

@@ -4,8 +4,44 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  /* ── Tema Escuro (padrão) ──────────────────────── */
+  :root, .dark {
     color-scheme: dark;
+
+    --color-background:           #0a0f1e;
+    --color-background-secondary: #0d1426;
+    --color-surface:              #111827;
+    --color-surface-hover:        #1a2332;
+    --color-surface-active:       #1e2d45;
+    --color-border:               #1e3a5f;
+    --color-border-subtle:        #162035;
+    --color-border-strong:        #2563eb;
+    --color-text:                 #f1f5f9;
+    --color-text-muted:           #94a3b8;
+    --color-text-subtle:          #64748b;
+    --color-text-inverse:         #0a0f1e;
+    --shadow-card:                0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6);
+    --shadow-card-hover:          0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ── Tema Claro ────────────────────────────────── */
+  .light {
+    color-scheme: light;
+
+    --color-background:           #f0f4f8;
+    --color-background-secondary: #e8eef5;
+    --color-surface:              #ffffff;
+    --color-surface-hover:        #f8fafc;
+    --color-surface-active:       #eff6ff;
+    --color-border:               #e2e8f0;
+    --color-border-subtle:        #f1f5f9;
+    --color-border-strong:        #2563eb;
+    --color-text:                 #0f172a;
+    --color-text-muted:           #475569;
+    --color-text-subtle:          #94a3b8;
+    --color-text-inverse:         #ffffff;
+    --shadow-card:                0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover:          0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
   * {
@@ -23,6 +59,7 @@
   body {
     @apply bg-background text-text min-h-screen;
     overscroll-behavior: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Scrollbar personalizado */
@@ -31,10 +68,10 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #111827;
+    background: var(--color-surface);
   }
   ::-webkit-scrollbar-thumb {
-    background: #1e3a5f;
+    background: var(--color-border);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
@@ -51,7 +88,7 @@
   /* Seleção de texto */
   ::selection {
     background: rgba(37, 99, 235, 0.3);
-    color: #f1f5f9;
+    color: var(--color-text);
   }
 }
 

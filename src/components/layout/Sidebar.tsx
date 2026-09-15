@@ -1,11 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/useAppStore'
 import { useAuth } from '@/hooks/useAuth'
+import { useTheme } from '@/hooks/useTheme'
 import { cn } from '@/lib/utils'
 import {
   QrCode, List, Clock, FileText, Activity,
   Building2, Users, Settings, LogOut, ChevronRight,
-  Shield, Server
+  Shield, Server, Sun, Moon
 } from 'lucide-react'
 
 interface NavItem {
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const { profile } = useAppStore()
   const { signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const isAdmin = profile?.role === 'admin'
 
   const visibleItems = navItems.filter(item => !item.adminOnly || isAdmin)
@@ -73,9 +75,9 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* User info + logout */}
-      <div className="px-3 py-4 border-t border-border">
-        <div className="flex items-center gap-3 px-3 py-2 mb-1">
+      {/* User info + tema + logout */}
+      <div className="px-3 py-4 border-t border-border space-y-1">
+        <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
             <span className="text-xs font-semibold text-primary">
               {profile?.nome?.charAt(0)?.toUpperCase() ?? '?'}
@@ -86,6 +88,20 @@ export function Sidebar() {
             <p className="text-2xs text-text-subtle truncate">{profile?.email ?? '—'}</p>
           </div>
         </div>
+
+        {/* Botão de tema */}
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm
+                     text-text-muted hover:text-text hover:bg-surface-hover
+                     transition-colors duration-200"
+        >
+          {theme === 'dark'
+            ? <><Sun className="w-4 h-4" /> Tema claro</>
+            : <><Moon className="w-4 h-4" /> Tema escuro</>
+          }
+        </button>
+
         <button
           onClick={signOut}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm

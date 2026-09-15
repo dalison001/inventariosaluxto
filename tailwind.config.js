@@ -5,46 +5,45 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Paleta base — azul quase preto
         background: {
-          DEFAULT: '#0a0f1e',
-          secondary: '#0d1426',
+          DEFAULT: 'var(--color-background)',
+          secondary: 'var(--color-background-secondary)',
         },
         surface: {
-          DEFAULT: '#111827',  // gray-900
-          hover: '#1a2332',
-          active: '#1e2d45',
+          DEFAULT: 'var(--color-surface)',
+          hover: 'var(--color-surface-hover)',
+          active: 'var(--color-surface-active)',
         },
         border: {
-          DEFAULT: '#1e3a5f',
-          subtle: '#162035',
-          strong: '#2563eb',
+          DEFAULT: 'var(--color-border)',
+          subtle: 'var(--color-border-subtle)',
+          strong: 'var(--color-border-strong)',
         },
         primary: {
-          DEFAULT: '#2563eb',  // blue-600
-          hover: '#1d4ed8',    // blue-700
-          light: '#3b82f6',    // blue-500
-          dark: '#1e40af',     // blue-800
+          DEFAULT: '#2563eb',
+          hover: '#1d4ed8',
+          light: '#3b82f6',
+          dark: '#1e40af',
           subtle: 'rgba(37, 99, 235, 0.1)',
         },
         accent: {
-          DEFAULT: '#38bdf8',  // sky-400
+          DEFAULT: '#38bdf8',
           hover: '#0ea5e9',
         },
         text: {
-          DEFAULT: '#f1f5f9',  // slate-100
-          muted: '#94a3b8',    // slate-400
-          subtle: '#64748b',   // slate-500
-          inverse: '#0a0f1e',
+          DEFAULT: 'var(--color-text)',
+          muted: 'var(--color-text-muted)',
+          subtle: 'var(--color-text-subtle)',
+          inverse: 'var(--color-text-inverse)',
         },
         status: {
-          pendente: '#f59e0b',         // amber-500
+          pendente: '#f59e0b',
           pendenteBg: 'rgba(245, 158, 11, 0.1)',
-          validado: '#10b981',         // emerald-500
+          validado: '#10b981',
           validadoBg: 'rgba(16, 185, 129, 0.1)',
-          danger: '#ef4444',           // red-500
+          danger: '#ef4444',
           dangerBg: 'rgba(239, 68, 68, 0.1)',
-          info: '#38bdf8',             // sky-400
+          info: '#38bdf8',
           infoBg: 'rgba(56, 189, 248, 0.1)',
         }
       },
@@ -58,8 +57,8 @@ export default {
       boxShadow: {
         'glow-blue': '0 0 20px rgba(37, 99, 235, 0.3)',
         'glow-blue-lg': '0 0 40px rgba(37, 99, 235, 0.2)',
-        'card': '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6)',
-        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.5)',
+        'card': 'var(--shadow-card)',
+        'card-hover': 'var(--shadow-card-hover)',
       },
       borderRadius: {
         'xl': '12px',
