@@ -244,7 +244,6 @@ export default function CadastroPage() {
       <Stepper steps={steps} currentStep={currentStep} className="mb-8" />
 
       <form 
-        onSubmit={handleSubmit(onSubmit)}
         onKeyDown={(e) => {
           // Previne que 'Enter' submeta o form se não estivermos no último passo
           if (e.key === 'Enter' && currentStep !== 2) {
@@ -511,7 +510,8 @@ export default function CadastroPage() {
             </button>
           ) : (
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting || patrimonioStatus === 'duplicate'}
               className="btn-primary btn-lg"
             >
