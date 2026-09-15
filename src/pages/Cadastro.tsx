@@ -212,8 +212,25 @@ export default function CadastroPage() {
             </button>
 
             <button
-              onClick={() => navigate('/inventario')}
+              onClick={() => {
+                // Reset states para um novo cadastro limpo na mesma tela
+                setSavedItem(null)
+                setCurrentStep(0)
+                setValue('nome', '')
+                setValue('patrimonio', '')
+                setValue('numero_serie', '')
+                // Mantém o status e tipo (por conveniência) ou limpa também, mas nome/pat são cruciais
+                setTimeout(() => nomeRef.current?.focus(), 100)
+              }}
               className="btn-secondary w-full flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Cadastrar manualmente
+            </button>
+
+            <button
+              onClick={() => navigate('/inventario')}
+              className="btn-ghost w-full flex items-center justify-center gap-2 text-text-muted hover:text-text"
             >
               <ListFilter className="w-4 h-4" />
               Ir para o inventário
